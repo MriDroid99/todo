@@ -6,6 +6,9 @@ import 'package:provider/provider.dart';
 // Provider
 import '../provider/task.dart';
 
+// Screen
+import '../screen/add_task_screen.dart';
+
 class TaskWidget extends StatelessWidget {
   const TaskWidget({Key? key}) : super(key: key);
 
@@ -31,6 +34,15 @@ class TaskWidget extends StatelessWidget {
           subtitle: Text('${DateFormat.yMMMd().format(_task.date)}'),
         ),
       ),
+      actions: [
+        IconSlideAction(
+          caption: 'Edit',
+          color: Colors.yellow,
+          icon: Icons.edit,
+          onTap: () => Navigator.pushNamed(context, AddTaskScreen.routeName,
+              arguments: {'id': _task.id}),
+        )
+      ],
       secondaryActions: <Widget>[
         IconSlideAction(
           caption: 'Delete',

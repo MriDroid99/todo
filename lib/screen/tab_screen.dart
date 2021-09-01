@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 // Screen
 import './completed_screen.dart';
 import './in_progress_screen.dart';
 import './tasks_screen.dart';
 import './add_task_screen.dart';
+
+// Provider
+import '../provider/task.dart';
 
 class TabScreen extends StatefulWidget {
   const TabScreen({Key? key}) : super(key: key);
@@ -47,7 +51,17 @@ class _TabScreenState extends State<TabScreen> {
       appBar: AppBar(
         title: Text(_pages[_currentIndex]['title']),
       ),
-      body: _pages[_currentIndex]['body'],
+      body: FutureBuilder(
+        future: Provider.of<Tasks>(context).getData(),
+        builder: (_, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+          return _pages[_currentIndex]['body'];
+        },
+      ),
       bottomNavigationBar: BottomNavigationBar(
         onTap: _changeIndex,
         currentIndex: _currentIndex,

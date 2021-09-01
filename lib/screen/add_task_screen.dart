@@ -14,10 +14,13 @@ class AddTaskScreen extends StatefulWidget {
 }
 
 class _AddTaskScreenState extends State<AddTaskScreen> {
+  bool _isFirst = true;
+  var arg;
+  Task? task;
   var _titleController = TextEditingController();
   var _timeController = TextEditingController();
   var _dateController = TextEditingController();
-  TimeOfDay? _selectedTime;
+  TimeOfDay _selectedTime = TimeOfDay.now();
 
   void _showTime() {
     showTimePicker(
@@ -49,11 +52,33 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
     );
   }
 
+  // @override
+  // void initState() {
+  //   var arg = ModalRoute.of(context)!.settings.arguments;
+  //   print(arg);
+  //   super.initState();
+  // }
+  @override
+  void didChangeDependencies() {
+    if (_isFirst) {
+      arg = ModalRoute.of(context)!.settings.arguments;
+      print(arg);
+      if (arg != null) {
+        task = Provider.of<Tasks>(context, listen: false).findById(arg['id']);
+        _titleController.text = task!.title;
+        _timeController.text = task!.time.format(context);
+        _dateController.text = DateFormat.yMMMd().format(task!.date);
+      }
+      _isFirst = false;
+    }
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Task'),
+        title: Text(task == null ? 'Add Task' : 'Edit Task'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -95,13 +120,20 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
             ),
             ElevatedButton(
                 onPressed: () {
-                  Provider.of<Tasks>(context, listen: false).addTask(
-                      _titleController.text,
-                      _selectedTime!,
-                      DateFormat().add_yMMMd().parse(_dateController.text));
+                  task == null
+                      ? Provider.of<Tasks>(context, listen: false).addTask(
+                          _titleController.text,
+                          _selectedTime,
+                          DateFormat().add_yMMMd().parse(_dateController.text))
+                      : Provider.of<Tasks>(context, listen: false).updateTask(
+                          arg['id'],
+                          _titleController.text,
+                          _selectedTime,
+                          DateFormat().add_yMMMd().parse(_dateController.text),
+                        );
                   Navigator.pop(context);
                 },
-                child: Text('Add Task'))
+                child: Text(task == null ? 'Add Task' : 'Edit Task'))
           ],
         ),
       ),
